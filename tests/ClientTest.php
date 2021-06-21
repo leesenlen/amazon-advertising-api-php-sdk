@@ -13,8 +13,8 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         "region" => "na",
         "accessToken" => "Atza%7Ctest",
         "refreshToken" => "Atzr%7Ctest",
-        "sandbox" => true);
-
+        "sandbox" => true
+    );
 
     public function setUp()
     {
@@ -33,7 +33,6 @@ class ClientTest extends \PHPUnit\Framework\TestCase
              ->method("_executeRequest")
              ->will($this->returnValue($this->return_value));
     }
-
 
     public function testValidateClientId()
     {
@@ -68,6 +67,9 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * 验证accessToken是否失效
+     */
     public function testValidateAccessToken()
     {
         $testConfig = $this->config;

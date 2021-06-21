@@ -17,6 +17,6 @@ class Regions
             "prod"     => "advertising-api-fe.amazon.com",
             "sandbox"  => "advertising-api-test.amazon.com",
             "tokenUrl" => "api.amazon.co.jp/auth/o2/token",
-        ),
+        )
     );
 }
