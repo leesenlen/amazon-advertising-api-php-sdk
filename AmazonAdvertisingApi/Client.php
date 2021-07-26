@@ -549,6 +549,11 @@ class Client
         return $this->_operation("hsa/{$recordType}/snapshot", $data, "POST");
     }
 
+    public function getSnapshotInfo($snapshotId)
+    {
+        return $this->_operation("snapshots/{$snapshotId}");
+    }
+
     public function getSnapshot($snapshotId)
     {
         $req = $this->_operation("snapshots/{$snapshotId}");
