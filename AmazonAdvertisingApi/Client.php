@@ -611,9 +611,9 @@ class Client
         return $this->_operation("reports/{$reportId}");
     }
 
-    public function download($downloadInfo)
+    public function download($location)
     {
-        return $this->_download($downloadInfo["location"]);
+        return $this->_download($location);
     }
 
     public function getReport($reportId)
