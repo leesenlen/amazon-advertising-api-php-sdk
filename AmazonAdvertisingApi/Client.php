@@ -23,6 +23,8 @@ class Client
 
     public $profileId = null;
 
+    private $agent = false;
+
     public function __construct($config)
     {
         $regions = new Regions();
@@ -549,11 +551,6 @@ class Client
         return $this->_operation("hsa/{$recordType}/snapshot", $data, "POST");
     }
 
-    public function getSnapshotInfo($snapshotId)
-    {
-        return $this->_operation("snapshots/{$snapshotId}");
-    }
-
     public function getSnapshot($snapshotId)
     {
         $req = $this->_operation("snapshots/{$snapshotId}");
@@ -564,6 +561,11 @@ class Client
             }
         }
         return $req;
+    }
+
+    public function gettSnapshotInfo($snapshotId)
+    {
+        return  $this->_operation("snapshots/{$snapshotId}");
     }
 
     public function getSnapshotBrands($snapshotId)
@@ -627,6 +629,7 @@ class Client
         }
         return $req;
     }
+
 
     public function getTargetingClause($targetId)
     {
@@ -941,7 +944,24 @@ class Client
         $request->setOption(CURLOPT_HTTPHEADER, $headers);
         $request->setOption(CURLOPT_USERAGENT, $this->userAgent);
         $request->setOption(CURLOPT_CUSTOMREQUEST, strtoupper($method));
+
+        //添加代理
+        if($this->agent){
+            $ip = $this->_ipPool();
+            $request->setOption(CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
+            $request->setOption(CURLOPT_PROXY, $ip);
+            $request->setOption(CURLOPT_PROXYPORT, 8881);
+        }
+        
         return $this->_executeRequest($request);
+    }
+    private function _ipPool()
+    {
+        $ips = [
+            '47.90.61.250',
+            '47.91.139.104'
+        ];
+        return $ips[array_rand($ips, 1)];
     }
 
 
@@ -1043,10 +1063,13 @@ class Client
     protected function _executeRequest($request)
     {
         $response = $request->execute();
+
         $this->requestId = $request->requestId;
         $response_info = $request->getInfo();
-        $request->close();
 
+        $error = $request->getError();
+
+        $request->close();
 
         if ($response_info["http_code"] == 307) {
             /* application/octet-stream */
@@ -1063,7 +1086,7 @@ class Client
             }
             return array("success" => false,
                     "code" => $response_info["http_code"],
-                    "response" => $response,
+                    "response" => (empty($response)) ? $error : $response,
                     "requestId" => $requestId);
         } else {
             return array("success" => true,
@@ -1153,5 +1176,12 @@ class Client
     {
         error_log($message, 0);
         throw new \Exception($message);
+    }
+    /**
+     * 设置代理是否启用
+     */
+    public function setAgent($agent = true)
+    {
+        $this->agent = $agent;
     }
 }
