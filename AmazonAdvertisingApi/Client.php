@@ -25,6 +25,8 @@ class Client
 
     private $agent = false;
 
+    protected $ipPool;
+
     public function __construct($config)
     {
         $regions = new Regions();
@@ -563,7 +565,7 @@ class Client
         return $req;
     }
 
-    public function gettSnapshotInfo($snapshotId)
+    public function getSnapshotInfo($snapshotId)
     {
         return  $this->_operation("snapshots/{$snapshotId}");
     }
@@ -945,25 +947,23 @@ class Client
         $request->setOption(CURLOPT_USERAGENT, $this->userAgent);
         $request->setOption(CURLOPT_CUSTOMREQUEST, strtoupper($method));
 
-        //添加代理
-        if($this->agent){
-            $ip = $this->_ipPool();
-            $request->setOption(CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
-            $request->setOption(CURLOPT_PROXY, $ip);
-            $request->setOption(CURLOPT_PROXYPORT, 8881);
-        }
-        
         return $this->_executeRequest($request);
     }
-    private function _ipPool()
+    //设置代理IP
+    public function setIpPool($ipPool)
     {
-        $ips = [
-            '47.90.61.250',
-            '47.91.139.104'
-        ];
-        return $ips[array_rand($ips, 1)];
+        $this->ipPool = $ipPool;
     }
 
+    private function _ipPool()
+    {
+        if(!empty($this->ipPool)){
+            $ips = $this->ipPool;
+            return $ips[array_rand($ips, 1)];
+        }
+        return null;
+        
+    }
 
     private function _UploadAsset($params = array(), $filenames = array(), $additionalHeaders = array(), $imageType, $fileName)
     {
@@ -1062,6 +1062,16 @@ class Client
 
     protected function _executeRequest($request)
     {
+        //添加代理
+        if($this->agent){
+            $ip = $this->_ipPool();
+            if(!empty($ip)){
+                $request->setOption(CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
+                $request->setOption(CURLOPT_PROXY, $ip);
+                $request->setOption(CURLOPT_PROXYPORT, 8881);
+            }
+        }
+
         $response = $request->execute();
 
         $this->requestId = $request->requestId;
