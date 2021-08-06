@@ -563,7 +563,7 @@ class Client
         return $req;
     }
 
-    public function gettSnapshotInfo($snapshotId)
+    public function getSnapshotInfo($snapshotId)
     {
         return  $this->_operation("snapshots/{$snapshotId}");
     }
